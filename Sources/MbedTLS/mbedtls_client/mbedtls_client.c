@@ -31,7 +31,8 @@ mbedtls_client_handle_t mbedtls_client_init(
     void (*debug_func)(void*, int, const char *, int, const char *),
     void* io_context,
     int (*send_func)(void*, const uint8_t* buf, size_t len),
-    int (*recv_func)(void*, uint8_t* buf, size_t len)
+    int (*recv_func)(void*, uint8_t* buf, size_t len),
+    int* err_out
 ) {
     mbedtls_client_impl_t* impl = malloc(sizeof(mbedtls_client_impl_t));
     memset(impl, 0, sizeof(*impl));
@@ -44,12 +45,12 @@ mbedtls_client_handle_t mbedtls_client_init(
     mbedtls_ctr_drbg_init(&impl->ctr_drbg);
     mbedtls_entropy_init(&impl->entropy);
 
-    if (mbedtls_ctr_drbg_seed(&impl->ctr_drbg, mbedtls_entropy_func, &impl->entropy, NULL, 0)) {
+    if ((*err_out = mbedtls_ctr_drbg_seed(&impl->ctr_drbg, mbedtls_entropy_func, &impl->entropy, NULL, 0))) {
         mbedtls_client_free(impl);
         return NULL;
     }
 
-    if (mbedtls_ssl_config_defaults(&impl->config, MBEDTLS_SSL_IS_CLIENT, transport, MBEDTLS_SSL_PRESET_DEFAULT)) {
+    if ((*err_out = mbedtls_ssl_config_defaults(&impl->config, MBEDTLS_SSL_IS_CLIENT, transport, MBEDTLS_SSL_PRESET_DEFAULT))) {
         mbedtls_client_free(impl);
         return NULL;
     }
@@ -57,7 +58,7 @@ mbedtls_client_handle_t mbedtls_client_init(
     mbedtls_ssl_conf_rng(&impl->config, mbedtls_ctr_drbg_random, &impl->ctr_drbg);
     mbedtls_ssl_conf_ciphersuites(&impl->config, impl->cipher_suites);
 
-    if (mbedtls_ssl_conf_psk(&impl->config, psk, psk_len, (const char*)psk_id, psk_id_len)) {
+    if ((*err_out = mbedtls_ssl_conf_psk(&impl->config, psk, psk_len, (const uint8_t*)psk_id, psk_id_len))) {
         mbedtls_client_free(impl);
         return NULL;
     }
@@ -65,7 +66,7 @@ mbedtls_client_handle_t mbedtls_client_init(
     mbedtls_debug_set_threshold(1);
     mbedtls_ssl_conf_dbg(&impl->config, debug_func, NULL);
 
-    if (mbedtls_ssl_setup(&impl->context, &impl->config)) {
+    if ((*err_out = mbedtls_ssl_setup(&impl->context, &impl->config))) {
         mbedtls_client_free(impl);
         return NULL;
     }
