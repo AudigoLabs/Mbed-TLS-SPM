@@ -1,4 +1,4 @@
 module MbedTLS [system] {
-    header "../Header.h"
+    header "../mbedtls_client/mbedtls_client.h"
     export *
 }
