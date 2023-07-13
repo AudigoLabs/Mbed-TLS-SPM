@@ -23,9 +23,7 @@ mbedtls_client_handle_t mbedtls_client_init(
 
 void mbedtls_client_free(mbedtls_client_handle_t handle);
 
-int mbedtls_client_handshake_step(mbedtls_client_handle_t handle);
-
-int mbedtls_client_get_handshake_state(mbedtls_client_handle_t handle);
+int mbedtls_client_handshake(mbedtls_client_handle_t handle);
 
 int mbedtls_client_write(mbedtls_client_handle_t handle, const uint8_t* data, size_t length);
 

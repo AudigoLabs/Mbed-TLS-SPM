@@ -87,14 +87,9 @@ void mbedtls_client_free(mbedtls_client_handle_t handle) {
     free(impl);
 }
 
-int mbedtls_client_handshake_step(mbedtls_client_handle_t handle) {
+int mbedtls_client_handshake(mbedtls_client_handle_t handle) {
     mbedtls_client_impl_t* impl = handle;
-    return mbedtls_ssl_handshake_step(&impl->context);
-}
-
-int mbedtls_client_get_handshake_state(mbedtls_client_handle_t handle) {
-    mbedtls_client_impl_t* impl = handle;
-    return impl->context.state;
+    return mbedtls_ssl_handshake(&impl->context);
 }
 
 int mbedtls_client_write(mbedtls_client_handle_t handle, const unsigned char* data, unsigned long length) {
