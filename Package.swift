@@ -17,7 +17,10 @@ let package = Package(
     targets: [
         .target(
             name: "MbedTLS",
-            dependencies: []
+            dependencies: [],
+            cSettings: [
+                .define("MBEDTLS_SHA256_ALT")
+            ]
         ),
     ],
     swiftLanguageVersions: [.v5]
